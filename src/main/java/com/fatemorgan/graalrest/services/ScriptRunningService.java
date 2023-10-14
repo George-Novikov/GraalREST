@@ -17,13 +17,34 @@ import java.util.Map;
 
 @Service
 public class ScriptRunningService {
-    public Object run(ScriptRunRequest script) throws ScriptException {
-        ScriptEngine engine = new ScriptEngineManager().getEngineByName("graal.js");
-        Bindings bindings = engine.createBindings();
-        bindings.put("result", "true");
-        bindings.put("message", "OK");
-        if (script.hasArguments()) bindings.putAll(script.getArguments());
-        Object result = engine.eval(script.getScript(), bindings);
-        return new ScriptRunResponse(engine.get("result"), engine.get("message"));
+    Engine engine;
+    Context context;
+    Value bindings;
+
+    public ScriptRunningService(Engine engine, Context context, Value bindings) {
+        this.engine = engine;
+        this.context = context;
+        this.bindings = bindings;
+    }
+
+    public Object run(ScriptRunRequest script) {
+        bindings.putMember("result", true);
+        bindings.putMember("message", "OK");
+
+        if (script.hasArguments()){
+            script.getArguments().entrySet()
+                    .stream()
+                    .forEach(arg -> bindings.putMember(
+                            arg.getKey(),
+                            arg.getValue()
+                    ));
+        }
+
+        Value function = context.eval(Source.create("js", script.getScript()));
+
+        return new ScriptRunResponse(
+                bindings.getMember("result"),
+                bindings.getMember("message")
+        );
     }
 }

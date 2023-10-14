@@ -1,5 +1,7 @@
 package com.fatemorgan.graalrest.objects;
 
+import org.graalvm.polyglot.Value;
+
 public class ScriptRunResponse {
     private Boolean result;
     private String message;
@@ -11,7 +13,7 @@ public class ScriptRunResponse {
         this.message = message;
     }
 
-    public ScriptRunResponse(Object result, Object message){
+    public ScriptRunResponse(Value result, Value message){
         setResult(result);
         setMessage(message);
     }
@@ -20,9 +22,9 @@ public class ScriptRunResponse {
         return result;
     }
 
-    public void setResult(Object result) {
-        if (result != null && result instanceof Boolean){
-            this.result = (Boolean) result;
+    public void setResult(Value result) {
+        if (result != null && result.isBoolean()){
+            this.result = result.asBoolean();
         }
     }
 
@@ -30,9 +32,9 @@ public class ScriptRunResponse {
         return message;
     }
 
-    public void setMessage(Object message) {
-        if (message != null && message instanceof String){
-            this.message = (String) message;
+    public void setMessage(Value message) {
+        if (message != null && message.isString()){
+            this.message = message.asString();
         }
     }
 }

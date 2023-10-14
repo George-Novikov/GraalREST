@@ -3,6 +3,7 @@ package com.fatemorgan.graalrest.config;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.HostAccess;
+import org.graalvm.polyglot.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,5 +36,10 @@ public class ScriptRunnerConfig {
                 .option("js.ecmascript-version", "6")
                 .engine(engine())
                 .build();
+    }
+
+    @Bean
+    public Value bindings(){
+        return context().getBindings("js");
     }
 }

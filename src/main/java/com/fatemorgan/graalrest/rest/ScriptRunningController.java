@@ -1,6 +1,7 @@
 package com.fatemorgan.graalrest.rest;
 
 import com.fatemorgan.graalrest.objects.ScriptRunRequest;
+import com.fatemorgan.graalrest.objects.ScriptRunResponse;
 import com.fatemorgan.graalrest.services.ScriptRunningService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
