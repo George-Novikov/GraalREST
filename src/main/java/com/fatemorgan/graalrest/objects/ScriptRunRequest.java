@@ -2,6 +2,7 @@ package com.fatemorgan.graalrest.objects;
 
 import java.util.Map;
 
+/* Can be used to transfer data via JSON, but the script must be minified */
 public class ScriptRunRequest {
     private String script;
     private Map<String, String> arguments;

@@ -8,6 +8,7 @@ import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
@@ -27,24 +28,32 @@ public class ScriptRunningService {
         this.bindings = bindings;
     }
 
-    public Object run(ScriptRunRequest script) {
+    public ScriptRunResponse run(MultiValueMap<String, String> formInput) {
+        String script = formInput.getFirst("script");
+        if (script == null) throw new IllegalArgumentException("'script' parameter is absent.");
+
         bindings.putMember("result", true);
         bindings.putMember("message", "OK");
 
-        if (script.hasArguments()){
-            script.getArguments().entrySet()
+        if (formInput.size() > 1){
+            formInput.remove("script");
+            formInput.entrySet()
                     .stream()
                     .forEach(arg -> bindings.putMember(
                             arg.getKey(),
-                            arg.getValue()
+                            arg.getValue().get(0)
                     ));
         }
 
-        Value function = context.eval(Source.create("js", script.getScript()));
+        context.enter();
+        context.eval(Source.create("js", script));
 
-        return new ScriptRunResponse(
+        ScriptRunResponse response = new ScriptRunResponse(
                 bindings.getMember("result"),
                 bindings.getMember("message")
         );
+
+        context.leave();
+        return response;
     }
 }
