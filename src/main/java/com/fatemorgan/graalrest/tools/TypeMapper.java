@@ -12,15 +12,15 @@ import java.util.List;
 public class TypeMapper {
 
     private final List<Class> TYPES = Arrays.asList(
-            Integer.class,
             Double.class,
             Boolean.class,
             Object.class,
             ArrayList.class,
-            Integer[].class,
             Double[].class,
             Boolean[].class,
             Object[].class,
+            Integer.class,
+            Integer[].class,
             String.class,
             String[].class
     );
