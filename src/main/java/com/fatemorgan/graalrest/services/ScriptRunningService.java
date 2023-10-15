@@ -1,59 +1,60 @@
 package com.fatemorgan.graalrest.services;
 
-import com.fatemorgan.graalrest.objects.ScriptRunRequest;
-import com.fatemorgan.graalrest.objects.ScriptRunResponse;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Engine;
-import org.graalvm.polyglot.Source;
-import org.graalvm.polyglot.Value;
-import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fatemorgan.graalrest.tools.JsonBuilder;
+import com.fatemorgan.graalrest.tools.TypeMapper;
+import org.graalvm.polyglot.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
-import javax.script.Bindings;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import java.util.Map;
-
 @Service
 public class ScriptRunningService {
-    Engine engine;
-    Context context;
-    Value bindings;
+    private Engine engine;
+    private TypeMapper typeMapper;
+    private JsonBuilder jsonBuilder;
 
-    public ScriptRunningService(Engine engine, Context context, Value bindings) {
+    public ScriptRunningService(Engine engine,
+                                TypeMapper typeMapper,
+                                JsonBuilder jsonBuilder) {
         this.engine = engine;
-        this.context = context;
-        this.bindings = bindings;
+        this.typeMapper = typeMapper;
+        this.jsonBuilder = jsonBuilder;
     }
 
-    public ScriptRunResponse run(MultiValueMap<String, String> formInput) {
-        String script = formInput.getFirst("script");
-        if (script == null) throw new IllegalArgumentException("'script' parameter is absent.");
+    public Object run(MultiValueMap<String, Object> formInput) throws JsonProcessingException {
+        String script = (String) formInput.getFirst("script");
+        if (script == null) throw new IllegalArgumentException("The 'script' parameter is absent.");
 
-        bindings.putMember("result", true);
-        bindings.putMember("message", "OK");
+        try (Context context = buildContext()){
+            Value bindings = context.getBindings("js");
 
-        if (formInput.size() > 1){
-            formInput.remove("script");
-            formInput.entrySet()
-                    .stream()
-                    .forEach(arg -> bindings.putMember(
-                            arg.getKey(),
-                            arg.getValue().get(0)
-                    ));
+            if (formInput.size() > 1){
+                formInput.remove("script");
+                formInput.entrySet()
+                        .stream()
+                        .forEach(arg -> {
+                            bindings.putMember(
+                                    arg.getKey(),
+                                    typeMapper.convert(arg.getValue().get(0))
+                            );
+                        });
+            }
+
+            context.eval(Source.create("js", script));
+
+            return jsonBuilder.getJsonResult(formInput, bindings);
         }
+    }
 
-        context.enter();
-        context.eval(Source.create("js", script));
-
-        ScriptRunResponse response = new ScriptRunResponse(
-                bindings.getMember("result"),
-                bindings.getMember("message")
-        );
-
-        context.leave();
-        return response;
+    private Context buildContext(){
+        return Context
+                .newBuilder("js")
+                .allowHostAccess(HostAccess.ALL)
+                .allowHostClassLookup(className -> true)
+                .allowExperimentalOptions(true)
+                .option("js.nashorn-compat", "true")
+                .option("js.ecmascript-version", "6")
+                .engine(engine)
+                .build();
     }
 }

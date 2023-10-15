@@ -2,6 +2,7 @@ package com.fatemorgan.graalrest.objects;
 
 import org.graalvm.polyglot.Value;
 
+/* Can be used if global variables 'result' and 'message' are declared by default */
 public class ScriptRunResponse {
     private Boolean result;
     private String message;

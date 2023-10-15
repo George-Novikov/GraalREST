@@ -5,11 +5,11 @@ import java.util.Map;
 /* Can be used to transfer data via JSON, but the script must be minified */
 public class ScriptRunRequest {
     private String script;
-    private Map<String, String> arguments;
+    private Map<String, Object> arguments;
 
     public ScriptRunRequest() {}
 
-    public ScriptRunRequest(String script, Map<String, String> arguments) {
+    public ScriptRunRequest(String script, Map<String, Object> arguments) {
         this.script = script;
         this.arguments = arguments;
     }
@@ -22,11 +22,11 @@ public class ScriptRunRequest {
         this.script = script;
     }
 
-    public Map<String, String> getArguments() {
+    public Map<String, Object> getArguments() {
         return arguments;
     }
 
-    public void setArguments(Map<String, String> arguments) {
+    public void setArguments(Map<String, Object> arguments) {
         this.arguments = arguments;
     }
 

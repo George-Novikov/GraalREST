@@ -1,7 +1,5 @@
 package com.fatemorgan.graalrest.rest;
 
-import com.fatemorgan.graalrest.objects.ScriptRunRequest;
-import com.fatemorgan.graalrest.objects.ScriptRunResponse;
 import com.fatemorgan.graalrest.services.ScriptRunningService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +8,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("rest/api/scripts")
@@ -23,8 +19,12 @@ public class ScriptRunningController {
         this.scriptRunningService = scriptRunningService;
     }
 
-    @PostMapping(path = "/run", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<Object> runScript(@RequestBody MultiValueMap<String, String> formInput){
+    @PostMapping(
+            path = "/run",
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> runScript(@RequestBody MultiValueMap<String, Object> formInput){
         try {
             return ResponseEntity.ok(scriptRunningService.run(formInput));
         } catch (Exception e){
