@@ -29,15 +29,7 @@ public class ScriptRunningService {
             Value bindings = context.getBindings("js");
 
             if (formInput.size() > 1){
-                formInput.remove("script");
-                formInput.entrySet()
-                        .stream()
-                        .forEach(arg -> {
-                            bindings.putMember(
-                                    arg.getKey(),
-                                    typeMapper.convert(arg.getValue().get(0))
-                            );
-                        });
+                loadArguments(formInput, bindings);
             }
 
             context.eval(Source.create("js", script));
@@ -56,5 +48,19 @@ public class ScriptRunningService {
                 .option("js.ecmascript-version", "6")
                 .engine(engine)
                 .build();
+    }
+
+    private void loadArguments(MultiValueMap<String, Object> formInput, Value bindings){
+        formInput.remove("script");
+        formInput.entrySet()
+                .stream()
+                .forEach(arg -> {
+                    bindings.putMember(
+                            arg.getKey(),
+                            typeMapper.convert(
+                                    arg.getValue().get(0)
+                            )
+                    );
+                });
     }
 }
